@@ -28,7 +28,7 @@
 
 
 window.addEventListener("load",function(){
-  
+
 //INITIATE STUFFS
 var score=0;
 var level=1;
@@ -57,13 +57,13 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 for(var i=0;i<16;i++){
   var yCoord;
   var xCoord;
-  
+
   if(i<8) yCoord=0;
   if(i>=8) yCoord=50;
-  
+
   if(i<8) xCoord=i*64+10;
   if(i>=8) xCoord=((i-8)*64)+10;
-  
+
   enemies.push({x:xCoord,y:yCoord,xBase:xCoord,speedX:1,w:40,h:40});
 }
 
@@ -88,7 +88,7 @@ var rightDivObj=document.getElementById("rightDiv");
 
 leftDivObj.addEventListener("touchstart",function(){
 	console.log("test");
-  if(gameIsOver) window.location.href="../index.html";
+  if(gameIsOver) location.reload();
   if(levelIsComplete) nextLevel();
   player.left=true;
   player.right=false;
@@ -96,7 +96,7 @@ leftDivObj.addEventListener("touchstart",function(){
 
 rightDivObj.addEventListener("touchstart",function(){
   console.log("test");
-  if(gameIsOver) window.location.href="../index.html";
+  if(gameIsOver) location.reload();
   if(levelIsComplete) nextLevel();
   player.left=false;
   player.right=true;
@@ -105,7 +105,7 @@ rightDivObj.addEventListener("touchstart",function(){
 
 
 document.addEventListener("keydown",function(e){
-  
+
   //left
   if(e.which==37){
     player.left=true;
@@ -126,19 +126,19 @@ document.addEventListener("keydown",function(e){
     player.right=true;
     player.left=false;
   }
-  
+
   //spacebar
   if(e.which==32){
     e.preventDefault();
     if(!e.repeat) spacebarCounter=0;
     spacebarPressed=true;
   }
-  
+
   //enter
   if(e.which==13){
     if(waitingForEnter){
       if(levelIsComplete) nextLevel();
-      if(gameIsOver) window.location.replace("../index.html");
+      if(gameIsOver) location.reload();
     }
   };
 });
@@ -146,11 +146,11 @@ document.addEventListener("keydown",function(e){
 
 //keyups
 document.addEventListener("keyup",function(e){
-  
+
   //arrow keys
   if(e.which==37) player.left=false;
   if(e.which==39) player.right=false;
-  
+
   //spacebar
   if(e.which==32) spacebarPressed=false;
 })
@@ -162,17 +162,17 @@ var secondRand;
 
 function update(){
   if(gameLive){
-    
+
   //shoot every half second
   if(spacebarPressed){
     if(spacebarCounter==20) spacebarCounter=0;
     if(spacebarCounter===0) bullets.push({x:player.x+17,y:player.y+3,w:6,h:20});
     spacebarCounter++;
   }
-  
-  
+
+
   if(frameCount < fps) frameCount++;
-  
+
   if(enemies.length < 1){
     levelComplete();
   }
@@ -187,7 +187,7 @@ function update(){
   //update player
   if(player.left) player.x -= 2;
   if(player.right) player.x +=2;
-  
+
   //update player bullets
   bullets.forEach(function(element,index){
     element.y -= 6;
@@ -199,16 +199,16 @@ function update(){
       }
     });
   });
-  
+
   //update enemy bullets
   enemyBullets.forEach(function(element){
     element.y += 3;
     if(checkCollision(element,player)) gameOver();
   });
-  
+
   //update enemies
   enemies.forEach(function(element,index){
-    
+
     //gives enemies range of motion, bouce back and forth
     if(element.x >= element.xBase + 130){
       element.x = element.xBase + 130;
@@ -218,19 +218,19 @@ function update(){
       element.x = element.xBase;
       element.speedX *= -1;
     };
-    
+
     //move enemy right or left
     element.x += element.speedX;
-    
+
     //move enemy down
     if(frameCount == fps){
       element.y += 0.4;
     }
-    
+
     if(checkCollision(player,element)){
       gameOver();
     };
-    
+
   });
   if(frameCount == fps){
     frameCount=0;
@@ -240,42 +240,42 @@ function update(){
 
 
 function draw(){
-  
+
   if(gameLive){
 
   //draw background
   ctx.fillStyle="white";
   ctx.fillRect(0,0,GAME_WIDTH,GAME_HEIGHT);
-  
+
   //draw player
   ctx.fillStyle="blue";
   ctx.fillRect(player.x,player.y,player.w,player.h);
-  
+
   //draw enemies
   ctx.fillStyle="red";
   enemies.forEach(function(element){
     ctx.fillRect(element.x,element.y,element.w,element.h);
   });
-  
+
   //draw player bullets
   ctx.fillStyle="blue";
   bullets.forEach(function(element){
     ctx.fillRect(element.x,element.y,element.w,element.h);
   });
-  
+
   //draw enemy bullets
   enemyBullets.forEach(function(element){
     ctx.fillStyle="red";
     ctx.fillRect(element.x,element.y,element.w,element.h);
   });
-  
+
   //draw level
   ctx.fillStyle="blue";
   ctx.font="20px Arial";
   ctx.fillText("Level: "+level,520,290);
   ctx.fillText("Score: "+score,520,330);
   };
-  
+
 };
 
 function step(){
@@ -296,16 +296,16 @@ function checkCollision(rect1,rect2){
 }
 
 function gameOver(){
-  
+
   gameIsOver=true;
   waitingForEnter=true;
   gameLive=false;
-  
+
   //reset stuff
   bullets=[];
   enemyBullets=[];
   player.x=300;
-  
+
   //display game over screen
   ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT);
   ctx.font="100px Arial";
@@ -339,10 +339,10 @@ function nextLevel(){
     levelIsComplete=false;
     if(i<8) yCoord=0;
     if(i>=8) yCoord=50;
-    
+
     if(i<8) xCoord=i*64+10;
     if(i>=8) xCoord=((i-8)*64)+10;
-    
+
     enemies.push({x:xCoord,y:yCoord,xBase:xCoord,speedX:1,w:40,h:40});
   }
   waitingForEnter=false;
@@ -356,5 +356,5 @@ step();
 });
 </script>
 </body>
-  
+
 </html>

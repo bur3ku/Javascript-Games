@@ -139,19 +139,19 @@ var player={
 
 document.addEventListener('keydown',function(e){
   e.preventDefault();
-  
+
   if(e.which==38 || e.which==32){
     if(instructions){
       instructions = false;
       step();
     }
-    else if(gameIsOver) document.location.href="../index.html";
+    else if(gameIsOver) location.reload();
     else player.y -= 30;
   }
 
   if(e.which==13){
-    if(levelIsComplete) window.location.href="../index.html";
-    if(gameIsOver) document.location.href="../index.html";
+    if(levelIsComplete) location.reload();
+    if(gameIsOver) location.reload();
     if(instructions){
       instructions = false;
       step();
@@ -166,8 +166,8 @@ document.addEventListener('touchstart',function(){
     instructions = false;
     step();
   }
-  else if(levelIsComplete) window.location.href="../tictac/index.html";
-  else if(gameIsOver) document.location.href="../bouncing/index.html";
+  else if(levelIsComplete) location.reload();
+  else if(gameIsOver) location.reload();
   else player.y -= 30;
 });
 
@@ -223,7 +223,7 @@ function update(){
         gameOver();
       };
     };
-    
+
     if(!please) player.direction="false";
 
     if(element.logs.length == 0){
@@ -250,7 +250,7 @@ function update(){
             };
           };
         };
-          
+
         if(element2.direction == "right"){
           element2.x += 1;
           if(element2.x > GAME_WIDTH){
@@ -268,13 +268,13 @@ function update(){
         };
       });
     };
-    
+
   });
-  
+
   if(player.direction == "right") player.x ++;
   if(player.direction == "left") player.x --;
   please=false;
-  
+
 
   //create snow (maybe xD. 1/10 chance each frame)
   //1 or 2
@@ -300,12 +300,12 @@ function paint(){
   ctx.fillRect(winBlock.x,winBlock.y,winBlock.w,winBlock.h);
   ctx.fillStyle="black";
   ctx.fillRect(winBlock.x,winBlock.y+GAME_HEIGHT/12-2,winBlock.w,2);
-  
+
   grassBlocks.forEach(function(element,index){
     ctx.fillStyle="rgb(109,187,94)";
     ctx.fillRect(element.x,element.y,element.w,element.h);
   });
-  
+
   waterBlocks.forEach(function(element,index){
     ctx.fillStyle="rgb(23,148,187)";
     ctx.fillRect(element.x,element.y,element.w,element.h);
@@ -316,13 +316,13 @@ function paint(){
       });
     };
   });
-  
+
   //paint snow
   ctx.fillStyle="white";
   for(var i in snow){
     ctx.fillRect(snow[i].x,snow[i].y,3,10);
   }
-  
+
   ctx.fillStyle="red";
   ctx.drawImage(present,player.x,player.y,player.w+10,player.h+10);
   ctx.drawImage(tree,300,0,40,50);

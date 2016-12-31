@@ -51,7 +51,7 @@ window.addEventListener('load',function(){
     game_loop=setInterval(paint,180);
   }
   init();
-  
+
   function gameOver(){
     paused=true;
     gameIsOver=true;
@@ -63,14 +63,14 @@ window.addEventListener('load',function(){
     ctx.font="60px Arial";
     ctx.fillText("Length: "+length,320,300);
   }
-  
+
   function createSnake(){
     snake_array=[];
     for(var i = length-1; i >= 0; i--){
       snake_array.push({x:i,y:0});
     }
   }
-  
+
   function createFood(){
     food={
       x:(Math.floor(Math.random()*(w-cw)/cw)),
@@ -87,35 +87,35 @@ window.addEventListener('load',function(){
     };
     length++;
   }
-  
+
   function checkCollision(rect1,rect2){
     var closeOnWidth=(rect1.x-rect2.x) == 0;
     var closeOnHeight=(rect1.y-rect2.y) == 0;
     return closeOnWidth && closeOnHeight;
   };
-  
+
   function paint(){
     if(!paused){
       ctx.fillStyle="white";
       ctx.fillRect(0,0,w,h);
       ctx.strokeStyle="black";
       ctx.strokeRect(0,0,w,h);
-      
-      
+
+
       var nx=snake_array[0].x;
       var ny=snake_array[0].y;
-      
-      
+
+
       if(nx==food.x && ny==food.y){
         eatFood();
       }
-      
-      
+
+
       if(d=="right") nx++;
       else if(d=="left") nx--;
       else if(d=="up") ny--;
       else if(d=="down") ny++;
-      
+
       for(var i in snake_array){
         if(i > 0){
           if(checkCollision(snake_array[i],snake_array[0])) gameOver();
@@ -124,15 +124,15 @@ window.addEventListener('load',function(){
       if(nx == -1 || nx == w/cw || ny == -1 || ny == h/cw){
         gameOver();
       }
-      
-      
+
+
       //takes off tail of snake, adds head based on direction
       var tail=snake_array.pop();
       tail.x=nx;
       tail.y=ny;
       snake_array.unshift(tail);
-      
-      
+
+
       //paint snake
       for(var i = 0; i<snake_array.length; i++){
         var c = snake_array[i];
@@ -141,19 +141,19 @@ window.addEventListener('load',function(){
         ctx.strokeStyle="white";
         ctx.strokeRect(c.x*cw,c.y*cw,cw,cw);
       }
-      
+
       //paint food
       ctx.fillStyle="blue";
       ctx.fillRect(food.x*cw,food.y*cw,cw,cw);
       ctx.strokeStyle="white";
       ctx.strokeRect(food.x*cw,food.y*cw,cw,cw);
-      
+
       ctx.font="40px Georgia";
       lengthText=("Length: "+length);
       ctx.fillText(lengthText,10,580);
     }
   }
-  
+
     document.addEventListener('keydown',function(e){
       e.preventDefault();
       var code=e.keyCode || e.which;
@@ -169,12 +169,12 @@ window.addEventListener('load',function(){
       if(code=="38" && d!="down")d="up";
       if(code=="39" && d!="left")d="right";
       if(code=="40" && d!="up")d="down";
-      
+
       if(code == "13"){
-        if(gameIsOver) window.location.href="../index.html";
+        if(gameIsOver) location.reload();
       }
     });
-    
+
     document.getElementById('upDiv').addEventListener('touchstart',function(){
       if(d != "down") d="up";
     });
@@ -188,7 +188,7 @@ window.addEventListener('load',function(){
       if(d != "right") d="left";
     });
     document.addEventListener('touchstart',function(){
-      if(gameIsOver) window.location.href="../index.html";
+      if(gameIsOver) location.reload();
     });
 });
 </script>

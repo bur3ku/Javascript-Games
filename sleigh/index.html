@@ -27,7 +27,7 @@
 <script>
 
 window.addEventListener('load',function(){
-  
+
 //images
 var backgrounds={};
 
@@ -73,7 +73,7 @@ function addHouse(src,size){
   image.xCoord=GAME_WIDTH;
   image.present = false;
   houseList.push(image);
-  
+
 }
 
 addHouse("naughty","small");
@@ -114,7 +114,7 @@ window.addEventListener('touchstart',function(){
     jumpStartPos = sleigh.yCoord;
     sleigh.direction = "up";
   }
-  if(gameOver) window.location.href="http://henrygames.neocities.org";
+  if(gameOver) location.reload();
   if(instructions){
     instructions = false;
     window.cancelAnimationFrame(instructionAnimation);
@@ -134,7 +134,7 @@ document.addEventListener('keydown',function(e){
       sleigh.direction = "up";
     }
     if(gameOver){
-      window.location.href="http://henrygames.neocities.org";
+      location.reload();
     }
     if(instructions){
       instructions = false;
@@ -150,7 +150,7 @@ document.addEventListener('keydown',function(e){
 
 function update(){
   if(running){
-    
+
   for(var key in backgrounds){
     if(backgrounds.hasOwnProperty(key)){
       backgrounds[key].xCoord --;
@@ -197,11 +197,11 @@ function update(){
       houseList[i].moving = false;
       houseList[i].present = false;
     }
-      
+
     if(houseList[i].loaded) {
       if(houseList[i].moving) houseList[i].xCoord -= houseList[i].speed;
     }
-    
+
   }
   switch(sleigh.direction){
     case "up":
@@ -254,12 +254,12 @@ function update(){
 function draw(){
   if(running){
   ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT);
-  
+
   for(var i in backgrounds){
     ctx.drawImage(backgrounds[i],backgrounds[i].xCoord,0,640,360);
   }
   ctx.drawImage(sleigh,sleigh.xCoord,sleigh.yCoord,100,45);
-  
+
 //draw houses
   for(var i in houseList){
     if(houseList[i].loaded){
@@ -275,12 +275,12 @@ function draw(){
   ctx.fillStyle = "lightgreen";
   ctx.fillText("Presents Delivered: "+presentsDelivered,175,30);
   ctx.fillStyle = "red";
-    
+
   ctx.fillStyle="white";
   for(var i in snow){
     ctx.fillRect(snow[i].x,snow[i].y,3,10);
   }
-  
+
   }//if(running)
 }//draw()
 
@@ -314,10 +314,10 @@ function backgroundStep(){
   ctx.fillText("Don't let your sleigh hit the side of a house.",20,210);
   ctx.font = "27px Arial";
   ctx.fillText("Be careful! Don't give presents to naughty houses.",20,250);
-  
+
   ctx.fillText("Black houses are naughty!",20,310);
   ctx.drawImage(naughtyCross,350,250,100,100);
-  
+
   instructionAnimation = window.requestAnimationFrame(backgroundStep);
 };
 backgroundStep();
@@ -333,7 +333,7 @@ setInterval(function(){
       var rand=0;
     }
   }
-  
+
   if(rand === 0){
     var index = Math.floor(Math.random()*houseList.length);
     if(houseList[index].loaded){
