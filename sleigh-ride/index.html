@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Jump</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <style>
+      *{
+        margin:0;padding:0;
+      }
+      html,body{
+        height:100%;
+        width:100%;
+      }
+      #theCanvas{
+        background-image:url("https://www.google.com/url?sa=i&rct=j&q=&esrc=s&source=images&cd=&cad=rja&uact=8&ved=0ahUKEwiy85bF4PrQAhUHyGMKHRYoCDMQjRwIBw&url=https%3A%2F%2Fwww.pinterest.com%2Fpin%2F486881409690173486%2F&psig=AFQjCNEeghDM6-BqxRg63Jl2l_TZL3zn0w&ust=1482047802929221");
+      }
+      canvas{
+        position:absolute;
+        width:100%;
+        height:100%;
+      }
+    </style>
+  </head>
+  <body>
+<canvas id="theCanvas" width="640" height="360"></canvas>
+<div id='musicDiv' style='position:absolute; height:100px;width;30%;top:100%'><iframe id='musicIframe' height='100px' scrolling='no' frameborder='no' src='https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/298661054&amp;auto_play=true&amp;hide_related=true&amp;show_comments=false&amp;show_user=false&amp;show_reposts=false&amp;visual=true'></iframe></div>
+<script>
+
+window.addEventListener('load',function(){
+  
+//images
+var backgrounds={};
+
+backgrounds.background = new Image();
+backgrounds.background.src = "sky.jpg";
+backgrounds.background.xCoord = 0;
+
+backgrounds.background2 = new Image();
+backgrounds.background2.src = "sky.jpg";
+backgrounds.background2.xCoord = 640;
+//constants
+var GAME_WIDTH=640;
+var GAME_HEIGHT=360;
+
+//initialize stuffs (load everything up, set default values, etc)
+
+var instructionAnimation;
+var canvas=document.getElementById("theCanvas");
+var ctx=canvas.getContext("2d");
+var snow = [];
+var houseList=[];
+var running = true;
+var gameOver = false;
+var instructions = true;
+var presentsDelivered = 0;
+var level = 1;
+var height = 100;
+var jumpStartPos = GAME_HEIGHT-50;
+var downStartPos = 0;
+var backgroundX = 0;
+
+
+function addHouse(src,size){
+  var image = new Image();
+  image.addEventListener('load',function(){
+    image.loaded=true;
+  });
+  image.src="houses/"+src+".png";
+  image.moving=false;
+  image.h = 75;
+  if(size == "small") image.w = 90;
+  if(size == "large") image.w = 150;
+  image.xCoord=GAME_WIDTH;
+  image.present = false;
+  houseList.push(image);
+  
+}
+
+addHouse("naughty","small");
+addHouse("yellow","small");
+addHouse("redGarage","large");
+addHouse("greenGarage","large");
+addHouse("green","small");
+addHouse("brick","small");
+addHouse("blue","small");
+addHouse("blueGarage","large");
+
+
+var sleigh=new Image();
+sleigh.src="sleigh.png";
+sleigh.xCoord=20;
+sleigh.yCoord=310;
+sleigh.w=100;
+sleigh.h=45;
+sleigh.direction = false;
+
+var naughtyCross = new Image();
+naughtyCross.src = "houses/naughtyCross.png";
+
+var explosion = new Image();
+explosion.src = "explosion.png";
+
+function checkCollision(rect1,rect2){
+  if(rect1.xCoord >= rect2.xCoord) var closeOnWidth=Math.abs(rect1.xCoord-rect2.xCoord) <= rect2.w;
+  if(rect1.xCoord < rect2.xCoord) var closeOnWidth=Math.abs(rect1.xCoord-rect2.xCoord) <= rect1.w;
+  if(rect1.yCoord >= rect2.yCoord) var closeOnHeight = rect1.yCoord-rect2.yCoord <= rect2.h;
+  if(rect1.yCoord < rect2.yCoord) var closeOnHeight=Math.abs(rect1.yCoord-rect2.yCoord) <= rect1.h;
+  return closeOnWidth && closeOnHeight;
+};
+
+
+window.addEventListener('touchstart',function(){
+  if(!gameOver){
+    jumpStartPos = sleigh.yCoord;
+    sleigh.direction = "up";
+  }
+  if(gameOver) window.location.href="http://henrygames.neocities.org";
+  if(instructions){
+    instructions = false;
+    window.cancelAnimationFrame(instructionAnimation);
+    step();
+  }
+});
+
+document.addEventListener('keydown',function(e){
+  e.preventDefault();
+  if(e.keyCode == 80){
+    if(running) running = false;
+    else if(!running) running = true;
+  }
+  if(e.keyCode == 32 || e.keyCode == 38){
+    if(!gameOver){
+      jumpStartPos = sleigh.yCoord;
+      sleigh.direction = "up";
+    }
+    if(gameOver){
+      window.location.href="http://henrygames.neocities.org";
+    }
+    if(instructions){
+      instructions = false;
+      window.cancelAnimationFrame(instructionAnimation);
+      step();
+    }
+  }
+  if(e.keyCode == 80) {
+    running = !running;
+  }
+})
+
+
+function update(){
+  if(running){
+    
+  for(var key in backgrounds){
+    if(backgrounds.hasOwnProperty(key)){
+      backgrounds[key].xCoord --;
+      if(key == "background") if(backgrounds[key].xCoord < -639){
+        backgrounds["background"].xCoord=0;
+        backgrounds["background2"].xCoord=640;
+      }
+    }
+  }
+  for(var i in houseList){
+    if(checkCollision(sleigh,houseList[i])){
+      if(houseList[i].yCoord - sleigh.yCoord >= sleigh.h - 25){
+        if(sleigh.direction == "down"){
+          if(houseList[i].present != true) presentsDelivered ++;
+          houseList[i].present = true;
+          sleigh.direction = false;
+          break;
+        }
+      }
+      else if(Math.abs(houseList[i].yCoord - sleigh.yCoord) >= houseList[i].h - 10 || Math.abs(houseList[i].xCoord - sleigh.xCoord) <= sleigh.w - 10){
+        if(!Math.abs(houseList[i].yCoord - sleigh.yCoord >= sleigh.h - 5)){
+        running = false;
+        console.log(houseList[i].yCoord - sleigh.yCoord);
+        ctx.drawImage(explosion,sleigh.xCoord,sleigh.yCoord-20,180,150);
+        ctx.font="100px Arial";
+        ctx.fillStyle="red";
+        ctx.fillText("GAME OVER",10,180);
+        ctx.fillStyle="lightgreen";
+        ctx.font="35px Arial";
+        ctx.fillText("Presents Delivered: "+presentsDelivered,160,260);
+        gameOver = true;
+        }
+      }
+    }
+    else{
+      if(sleigh.yCoord < 310){
+        if(!sleigh.direction) sleigh.direction = "down";
+      }
+    }
+  }
+  for(var i in houseList){
+    if(houseList[i].xCoord < 0 - houseList[i].w){
+      houseList[i].xCoord = GAME_WIDTH;
+      houseList[i].moving = false;
+      houseList[i].present = false;
+    }
+      
+    if(houseList[i].loaded) {
+      if(houseList[i].moving) houseList[i].xCoord -= houseList[i].speed;
+    }
+    
+  }
+  switch(sleigh.direction){
+    case "up":
+      var difference = sleigh.yCoord - (jumpStartPos - 150);
+      if(difference < 30){
+      sleigh.yCoord -= difference /3;
+      }
+      else if(difference < 75){
+      sleigh.yCoord -= difference/5;
+      }
+      else{sleigh.yCoord -= (difference/10);}
+      difference = sleigh.yCoord - (jumpStartPos - 150);
+      if(difference < 1){
+        downStartPos = sleigh.yCoord;
+        sleigh.direction = "down";
+        }
+      break;
+    case "down":
+      var difference = sleigh.yCoord - downStartPos;
+      sleigh.yCoord += 3.5;
+      difference = sleigh.yCoord - downStartPos;
+      if(sleigh.yCoord > 310){
+        sleigh.yCoord=310;
+        sleigh.direction = false;
+      }
+      break;
+    case "left":
+      break;
+    case "right":
+      break;
+  }
+  var snowBoolean=Math.floor(Math.random()*10)+1;
+  if(snowBoolean==1){
+    var snowCoord=Math.floor(Math.random()*21)+1;
+    snow.push({x:snowCoord*30,y:-5});
+  }
+  for(var i in snow){
+    snow[i].y += 1;
+    snow[i].x -= 0.2;
+    if(snow[i].y > GAME_HEIGHT) {
+      snow.splice(i,1);
+    }
+  }
+
+  }//if running
+}//end of update()
+
+
+
+function draw(){
+  if(running){
+  ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT);
+  
+  for(var i in backgrounds){
+    ctx.drawImage(backgrounds[i],backgrounds[i].xCoord,0,640,360);
+  }
+  ctx.drawImage(sleigh,sleigh.xCoord,sleigh.yCoord,100,45);
+  
+//draw houses
+  for(var i in houseList){
+    if(houseList[i].loaded){
+      if(houseList[i].moving){
+        ctx.globalAlpha = 1;
+        if(!houseList[i].present) ctx.globalAlpha = 0.7;
+        ctx.drawImage(houseList[i],houseList[i].xCoord,houseList[i].yCoord,houseList[i].w,houseList[i].h);
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+  ctx.font = "30px Arial";
+  ctx.fillStyle = "lightgreen";
+  ctx.fillText("Presents Delivered: "+presentsDelivered,175,30);
+  ctx.fillStyle = "red";
+    
+  ctx.fillStyle="white";
+  for(var i in snow){
+    ctx.fillRect(snow[i].x,snow[i].y,3,10);
+  }
+  
+  }//if(running)
+}//draw()
+
+
+function step(){
+  update();
+  draw();
+  window.requestAnimationFrame(step);
+};
+
+function backgroundStep(){
+  for(var key in backgrounds){
+    if(backgrounds.hasOwnProperty(key)){
+      backgrounds[key].xCoord --;
+      if(key == "background") if(backgrounds[key].xCoord < -639){
+        backgrounds["background"].xCoord=0;
+        backgrounds["background2"].xCoord=640;
+      }
+    }
+  }
+  for(var i in backgrounds){
+    ctx.drawImage(backgrounds[i],backgrounds[i].xCoord,0,640,360);
+  }
+  ctx.fillStyle="white";
+  ctx.font = "75px Arial";
+  ctx.fillText("Instructions",120,70);
+  ctx.font = "40px Arial";
+  ctx.fillText("Use the spacebar to jump.",90,120);
+  ctx.font = "33px Arial";
+  ctx.fillText("Jump on top of houses to deliver presents.",20,170);
+  ctx.fillText("Don't let your sleigh hit the side of a house.",20,210);
+  ctx.font = "27px Arial";
+  ctx.fillText("Be careful! Don't give presents to naughty houses.",20,250);
+  
+  ctx.fillText("Black houses are naughty!",20,310);
+  ctx.drawImage(naughtyCross,350,250,100,100);
+  
+  instructionAnimation = window.requestAnimationFrame(backgroundStep);
+};
+backgroundStep();
+
+setInterval(function(){
+  if(running){
+  //add house
+  for(var i in houseList){
+    if(houseList[i].moving) {
+      var rand = Math.floor(Math.random()*4-level);
+      break;
+    }else{
+      var rand=0;
+    }
+  }
+  
+  if(rand === 0){
+    var index = Math.floor(Math.random()*houseList.length);
+    if(houseList[index].loaded){
+      if(!houseList[index].moving){
+        houseList[index].moving=true;
+        houseList[index].xCoord=GAME_WIDTH;
+        houseList[index].yCoord=Math.floor(Math.random()*100)+150;
+        houseList[index].speed=4;
+      }
+    }
+  }
+  }
+},1000);
+
+});
+</script>
+  </body>
+</html>
