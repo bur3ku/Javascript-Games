@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<style>
+*{
+  margin:0;padding:0;
+}
+html,body{
+  height:100%;
+  width:100%;
+}
+canvas{
+  position:absolute;
+  width:100%;
+  height:100%;
+}
+</style>
+</head>
+<body>
+<canvas id="canvas" height="600" width="900"></canvas>
+<div id="middleDiv" style="position:absolute;height:4%;width:2%;top:77%;left:83%;background-color:blue"></div>
+<div id="leftDiv" style="position:absolute;height:8%;width:9%;top:75%;left:74%;background-color:red"></div>
+<div id="rightDiv" style="position:absolute;height:8%;width:9%;top:75%;left:85%;background-color:red"></div>
+<div id="upDiv" style="position:absolute;height:16%;width:4.5%;top:61%;left:81.75%;background-color:red"></div>
+<div id="downDiv" style="position:absolute;height:16%;width:4.5%;top:81%;left:81.75%;background-color:red"></div>
+<div id='musicDiv' style='position:absolute; height:100px;width;30%;top:100%'><iframe id='musicIframe' height='100px' scrolling='no' frameborder='no' src='https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/98817821&amp;auto_play=true&amp;hide_related=true&amp;show_comments=false&amp;show_user=false&amp;show_reposts=false&amp;visual=true'></iframe></div>
+<script>
+
+window.addEventListener('load',function(){
+  var canvas = document.getElementById("canvas");
+  var ctx=canvas.getContext("2d");
+  var w = 900;
+  var h = 600;
+  var GAME_WIDTH=900;
+  var GAME_HEIGHT=600;
+  var snakeArray;
+  var d;
+  var cw=40;
+  var food;
+  var paused=false;
+  var length;
+  var gameIsOver=false;
+
+  function init(){
+    length=6;
+    d="right";
+    createSnake();
+    createFood();
+    if(typeof game_loop != "undefined") clearInterval(game_loop);
+    game_loop=setInterval(paint,180);
+  }
+  init();
+  
+  function gameOver(){
+    paused=true;
+    gameIsOver=true;
+    //display game over screen
+    ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT);
+    ctx.font="145px Arial";
+    ctx.fillStyle="red";
+    ctx.fillText("GAME OVER",10,180);
+    ctx.font="60px Arial";
+    ctx.fillText("Length: "+length,320,300);
+  }
+  
+  function createSnake(){
+    snake_array=[];
+    for(var i = length-1; i >= 0; i--){
+      snake_array.push({x:i,y:0});
+    }
+  }
+  
+  function createFood(){
+    food={
+      x:(Math.floor(Math.random()*(w-cw)/cw)),
+      y:(Math.floor(Math.random()*(h-cw)/cw)),
+    };
+  }
+
+
+  function eatFood(){
+    snake_array.push({x:(snake_array[snake_array.length-1].x),y:snake_array[snake_array.length-1].y});
+    food={
+      x:(Math.floor(Math.random()*(w-cw)/cw)),
+      y:(Math.floor(Math.random()*(h-cw)/cw)),
+    };
+    length++;
+  }
+  
+  function checkCollision(rect1,rect2){
+    var closeOnWidth=(rect1.x-rect2.x) == 0;
+    var closeOnHeight=(rect1.y-rect2.y) == 0;
+    return closeOnWidth && closeOnHeight;
+  };
+  
+  function paint(){
+    if(!paused){
+      ctx.fillStyle="white";
+      ctx.fillRect(0,0,w,h);
+      ctx.strokeStyle="black";
+      ctx.strokeRect(0,0,w,h);
+      
+      
+      var nx=snake_array[0].x;
+      var ny=snake_array[0].y;
+      
+      
+      if(nx==food.x && ny==food.y){
+        eatFood();
+      }
+      
+      
+      if(d=="right") nx++;
+      else if(d=="left") nx--;
+      else if(d=="up") ny--;
+      else if(d=="down") ny++;
+      
+      for(var i in snake_array){
+        if(i > 0){
+          if(checkCollision(snake_array[i],snake_array[0])) gameOver();
+        }
+      }
+      if(nx == -1 || nx == w/cw || ny == -1 || ny == h/cw){
+        gameOver();
+      }
+      
+      
+      //takes off tail of snake, adds head based on direction
+      var tail=snake_array.pop();
+      tail.x=nx;
+      tail.y=ny;
+      snake_array.unshift(tail);
+      
+      
+      //paint snake
+      for(var i = 0; i<snake_array.length; i++){
+        var c = snake_array[i];
+        ctx.fillStyle="blue";
+        ctx.fillRect(c.x*cw,c.y*cw,cw,cw);
+        ctx.strokeStyle="white";
+        ctx.strokeRect(c.x*cw,c.y*cw,cw,cw);
+      }
+      
+      //paint food
+      ctx.fillStyle="blue";
+      ctx.fillRect(food.x*cw,food.y*cw,cw,cw);
+      ctx.strokeStyle="white";
+      ctx.strokeRect(food.x*cw,food.y*cw,cw,cw);
+      
+      ctx.font="40px Georgia";
+      lengthText=("Length: "+length);
+      ctx.fillText(lengthText,10,580);
+    }
+  }
+  
+    document.addEventListener('keydown',function(e){
+      e.preventDefault();
+      var code=e.keyCode || e.which;
+      if(code=="80" || code=="112"){
+        if(paused) paused=false;
+        else if(!paused){
+          paused=true;
+          ctx.font="80px Georgia";
+          ctx.fillText("Paused",315,315);
+        }
+      }
+      if(code=="37" && d!="right")d="left";
+      if(code=="38" && d!="down")d="up";
+      if(code=="39" && d!="left")d="right";
+      if(code=="40" && d!="up")d="down";
+      
+      if(code == "13"){
+        if(gameIsOver) window.location.href="../index.html";
+      }
+    });
+    
+    document.getElementById('upDiv').addEventListener('touchstart',function(){
+      if(d != "down") d="up";
+    });
+    document.getElementById('rightDiv').addEventListener('touchstart',function(){
+      if(d != "left") d="right";
+    });
+    document.getElementById('downDiv').addEventListener('touchstart',function(){
+      if(d != "up") d="down";
+    });
+    document.getElementById('leftDiv').addEventListener('touchstart',function(){
+      if(d != "right") d="left";
+    });
+    document.addEventListener('touchstart',function(){
+      if(gameIsOver) window.location.href="../index.html";
+    });
+});
+</script>
+</body>
+</html>
